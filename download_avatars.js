@@ -40,8 +40,13 @@ function getRepoContributors(repoOwner, repoName, cb) {
     });
 }
 
+const argForOwner = process.argv[2];
+const argForRepo = process.argv[3];
 
-getRepoContributors("jquery", "jquery", (err, result) => {
+getRepoContributors(argForOwner, argForRepo, (err, result) => {
+  if (!(argForOwner && argForRepo)){
+    console.log("Please specify an owner and repository name.");
+  }
   if(err) {
     console.error('Something went wrong: ', err.message);
     return;
