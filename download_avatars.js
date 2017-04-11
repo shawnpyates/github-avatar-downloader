@@ -18,7 +18,6 @@ function getRepoContributors(repoOwner, repoName, cb) {
   }
   let responseString = "";
   request.get(options)
-
          .on('error', (err) => {
            cb;
          })
@@ -26,16 +25,18 @@ function getRepoContributors(repoOwner, repoName, cb) {
            console.log(`Response code: ${response.statusCode}\n`);
            console.log(`Response message: ${response.statusMessage}\n`);
            console.log(`Content type: ${response.headers['content-type']}\n`);
-           response.on('data', (data) => {
-            responseString += data;
-           })
+         })
+         .on('data', (data) => {
+           responseString += data;
          })
          .on('end', () => {
-         console.log(responseString);
+         let parsedResponse = JSON.parse(responseString);
+         cb(parsedResponse);
          });
 }
 
-getRepoContributors("jquery", "jquery", (err, result) => {
-  console.log("Error: " + err);
-  console.log("Result: " + result);
+getRepoContributors("jquery", "jquery", (result) => {
+  for (let i = 0; i < result.length; i++) {
+    console.log(result[i]['avatar_url']);
+  }
 });
