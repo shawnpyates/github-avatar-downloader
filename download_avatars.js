@@ -1,6 +1,7 @@
 const request = require('request');
+const fs = require('fs');
 const GITHUB_USER = "shawnpyates";
-const GITHUB_TOKEN = "51e91f5f725a8afeecea8212f548fd42c8b665b4";
+const GITHUB_TOKEN = require('./import').githubToken;
 
 console.log("Welcome to the Github Avatar Downloader!");
 
@@ -39,13 +40,33 @@ function getRepoContributors(repoOwner, repoName, cb) {
     });
 }
 
+
 getRepoContributors("jquery", "jquery", (err, result) => {
   if(err) {
     console.error('Something went wrong: ', err.message);
     return;
   }
   for (let i = 0; i < result.length; i++) {
-    console.log(result[i]['avatar_url']);
+    downloadImageByURL(result[i]['avatar_url'], `./avatarsFolder/${result[i]['login']}.jpg`);
   }
 });
+
+function downloadImageByURL(url, filePath) {
+  request
+    .get(url)
+    .on('error', (err) => {
+      console.error("Error: ", err.message);
+    })
+    .on('response', (response) => {
+      if (response.statusCode !== 200) {
+        console.error("Something went wrong: ", response.statusCode);
+      }
+    })
+    .on('end', () => {
+      console.log("Download complete.");
+    })
+    .pipe(fs.createWriteStream(filePath));
+}
+
+
 
