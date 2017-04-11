@@ -17,26 +17,35 @@ function getRepoContributors(repoOwner, repoName, cb) {
     }
   }
   let responseString = "";
-  request.get(options)
-         .on('error', (err) => {
-           cb;
-         })
-         .on('response', (response) => {
-           console.log(`Response code: ${response.statusCode}\n`);
-           console.log(`Response message: ${response.statusMessage}\n`);
-           console.log(`Content type: ${response.headers['content-type']}\n`);
-         })
-         .on('data', (data) => {
-           responseString += data;
-         })
-         .on('end', () => {
-         let parsedResponse = JSON.parse(responseString);
-         cb(parsedResponse);
-         });
+  request
+    .get(options)
+    .on('error', (err) => {
+       cb(err);
+    })
+    .on('data', (data) => {
+      responseString += data;
+    })
+    .on('end', function() {
+      let parsedResponse;
+      try {
+        parsedResponse = JSON.parse(responseString);
+      } catch(ex) {
+        return cb(ex);
+      }
+      if(this.response.statusCode !== 200) {
+        return cb(new Error(parsedResponse.message));
+      }
+      cb(null, parsedResponse);
+    });
 }
 
-getRepoContributors("jquery", "jquery", (result) => {
+getRepoContributors("jquery", "jquery", (err, result) => {
+  if(err) {
+    console.error('Something went wrong: ', err.message);
+    return;
+  }
   for (let i = 0; i < result.length; i++) {
     console.log(result[i]['avatar_url']);
   }
 });
+
